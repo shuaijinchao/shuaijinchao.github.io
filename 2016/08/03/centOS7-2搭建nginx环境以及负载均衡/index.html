@@ -5,13 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="帅小超的博客">
-    <meta name="keyword"  content="好未来">
+    <meta name="description" content="帅进超(Janko)的博客。主要分享关于PHP、GO、Python、Lua等语言的相关技术，新闻和最新动态。">
+    <meta name="keyword"  content="PHP,Python,Golang,Lua,OpenResty">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
     <title>
         
-        centOS7.2搭建nginx环境以及负载均衡 - 帅小超的博客 | JinChao&#39;s Blog
+        centOS7.2搭建nginx环境以及负载均衡 - 帅进超的博客 | Janko&#39;s Bolg
         
     </title>
 
@@ -35,7 +35,7 @@
 </div>
 
 <div class="index-about">
-    <i> sometimes code， sometimes design </i>
+    <i>  </i>
 </div>
 
 <div class="index-container">
@@ -48,7 +48,7 @@
             <img src="/img/avatar.jpg" />
         </div>
         <div class="name">
-            <i>JinChao Shuai</i>
+            <i>Janko.Shuai</i>
         </div>
     </div>
     <div class="contents" id="nav-content">
@@ -108,7 +108,7 @@
     </div>
 </div>
         <div class="index-about-mobile">
-            <i> sometimes code， sometimes design </i>
+            <i>  </i>
         </div>
     </div>
     
@@ -185,16 +185,6 @@
 <figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="number">1</span>、firewalld简介</span><br><span class="line">firewalld是centos7的一大特性，最大的好处有两个：支持动态更新，不用重启服务；第二个就是加入了防火墙的“zone”概念</span><br><span class="line"> </span><br><span class="line">firewalld有图形界面和工具界面，由于我在服务器上使用，图形界面请参照官方文档，本文以字符界面做介绍</span><br><span class="line"> </span><br><span class="line">firewalld的字符界面管理工具是 firewall-<span class="keyword">cmd</span><span class="bash"> </span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">firewalld默认配置文件有两个：/usr/lib/firewalld/ （系统配置，尽量不要修改）和 /etc/firewalld/ （用户配置地址）</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">zone概念：</span></span><br><span class="line"><span class="bash">硬件防火墙默认一般有三个区，firewalld引入这一概念系统默认存在以下区域（根据文档自己理解，如果有误请指正）：</span></span><br><span class="line"><span class="bash">drop：默认丢弃所有包</span></span><br><span class="line"><span class="bash">block：拒绝所有外部连接，允许内部发起的连接</span></span><br><span class="line"><span class="bash">public：指定外部连接可以进入</span></span><br><span class="line"><span class="bash">external：这个不太明白，功能上和上面相同，允许指定的外部连接</span></span><br><span class="line"><span class="bash">dmz：和硬件防火墙一样，受限制的公共连接可以进入</span></span><br><span class="line"><span class="bash">work：工作区，概念和workgoup一样，也是指定的外部连接允许</span></span><br><span class="line"><span class="bash">home：类似家庭组</span></span><br><span class="line"><span class="bash">internal：信任所有连接</span></span><br><span class="line"><span class="bash">对防火墙不算太熟悉，还没想明白public、external、dmz、work、home从功能上都需要自定义允许连接，具体使用上的区别还需高人指点</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">2、安装firewalld</span></span><br><span class="line"><span class="bash">root执行 <span class="comment"># yum install firewalld firewall-config</span></span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">3、运行、停止、禁用firewalld</span></span><br><span class="line"><span class="bash">启动：<span class="comment"># systemctl start  firewalld</span></span></span><br><span class="line"><span class="bash">查看状态：<span class="comment"># systemctl status firewalld 或者 firewall-cmd --state</span></span></span><br><span class="line"><span class="bash">停止：<span class="comment"># systemctl disable firewalld</span></span></span><br><span class="line"><span class="bash">禁用：<span class="comment"># systemctl stop firewalld</span></span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">4、配置firewalld</span></span><br><span class="line"><span class="bash">查看版本：$ firewall-cmd --version</span></span><br><span class="line"><span class="bash">查看帮助：$ firewall-cmd --<span class="built_in">help</span></span></span><br><span class="line"><span class="bash">查看设置：</span></span><br><span class="line"><span class="bash">                显示状态：$ firewall-cmd --state</span></span><br><span class="line"><span class="bash">                查看区域信息: $ firewall-cmd --get-active-zones</span></span><br><span class="line"><span class="bash">                查看指定接口所属区域：$ firewall-cmd --get-zone-of-interface=eth0</span></span><br><span class="line"><span class="bash">拒绝所有包：<span class="comment"># firewall-cmd --panic-on</span></span></span><br><span class="line"><span class="bash">取消拒绝状态：<span class="comment"># firewall-cmd --panic-off</span></span></span><br><span class="line"><span class="bash">查看是否拒绝：$ firewall-cmd --query-panic</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">更新防火墙规则：<span class="comment"># firewall-cmd --reload</span></span></span><br><span class="line"><span class="bash">                            <span class="comment"># firewall-cmd --complete-reload</span></span></span><br><span class="line"><span class="bash">    两者的区别就是第一个无需断开连接，就是firewalld特性之一动态添加规则，第二个需要断开连接，类似重启服务</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">将接口添加到区域，默认接口都在public</span></span><br><span class="line"><span class="bash"><span class="comment"># firewall-cmd --zone=public --add-interface=eth0</span></span></span><br><span class="line"><span class="bash">永久生效再加上 --permanent 然后reload防火墙</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">设置默认接口区域</span></span><br><span class="line"><span class="bash"><span class="comment"># firewall-cmd --set-default-zone=public</span></span></span><br><span class="line"><span class="bash">立即生效无需重启</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">打开端口（貌似这个才最常用）</span></span><br><span class="line"><span class="bash">查看所有打开的端口：</span></span><br><span class="line"><span class="bash"><span class="comment"># firewall-cmd --zone=dmz --list-ports</span></span></span><br><span class="line"><span class="bash">加入一个端口到区域：</span></span><br><span class="line"><span class="bash"><span class="comment"># firewall-cmd --zone=dmz --add-port=8080/tcp</span></span></span><br><span class="line"><span class="bash">若要永久生效方法同上</span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">打开一个服务，类似于将端口可视化，服务需要在配置文件中添加，/etc/firewalld 目录下有services文件夹，这个不详细说了，详情参考文档</span></span><br><span class="line"><span class="bash"><span class="comment"># firewall-cmd --zone=work --add-service=smtp</span></span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">移除服务</span></span><br><span class="line"><span class="bash"><span class="comment"># firewall-cmd --zone=work --remove-service=smtp</span></span></span><br><span class="line"><span class="bash"> </span></span><br><span class="line"><span class="bash">还有端口转发功能、自定义复杂规则功能、lockdown，由于还没用到，以后再学习</span></span><br></pre></td></tr></table></figure>
 
         
-            <div class="donate-container">
-    <div class="donate-button">
-        <button id="donate-button">赞赏</button>
-    </div>
-    <div class="donate-img-container hide" id="donate-img-container">
-        <img id="donate-img" src="" data-src="/img/donate.jpg">
-        <p> 感谢鼓励 </p>
-    </div>
-</div>
-        
         <br />
         <div id="comment-container">
         </div>
@@ -208,27 +198,11 @@
 <footer class="footer">
     <ul class="list-inline text-center">
         
-        <li>
-            <a target="_blank" href="https://twitter.com/iconie_alloy">
-                            <span class="fa-stack fa-lg">
-                                <i class="iconfont icon-twitter"></i>
-                            </span>
-            </a>
-        </li>
-        
-        
-        <li>
-            <a target="_blank" href="https://www.zhihu.com/people/ai-er-lan-xue-da">
-                            <span class="fa-stack fa-lg">
-                                 <i class="iconfont icon-zhihu"></i>
-                            </span>
-            </a>
-        </li>
         
 
         
         <li>
-            <a target="_blank" href="http://weibo.com/3286578617">
+            <a target="_blank" href="http://weibo.com/shuaijinchao">
                             <span class="fa-stack fa-lg">
                                   <i class="iconfont icon-weibo"></i>
                             </span>
@@ -237,18 +211,10 @@
         
 
         
-        <li>
-            <a target="_blank" href="https://www.facebook.com/xiaotao.nie.5">
-                            <span class="fa-stack fa-lg">
-                                <i class="iconfont icon-facebook"></i>
-                            </span>
-            </a>
-        </li>
-        
 
         
         <li>
-            <a target="_blank"  href="https://github.com/AirCloud">
+            <a target="_blank"  href="https://github.com/shuaijinchao">
                             <span class="fa-stack fa-lg">
                                 <i class="iconfont icon-github"></i>
                             </span>
@@ -257,39 +223,10 @@
         
 
         
-        <li>
-            <a target="_blank"  href="https://www.linkedin.com/in/进超-帅-80964aba">
-                            <span class="fa-stack fa-lg">
-                                <i class="iconfont icon-linkedin"></i>
-                            </span>
-            </a>
-        </li>
-        
 
     </ul>
     
     <p>
-        <span>/</span>
-        
-        <span><a href="https://www.10000h.top">10000H</a></span>
-        <span>/</span>
-        
-        <span><a href="https://niexiaotao.com">Xiaotao&#39;s Page</a></span>
-        <span>/</span>
-        
-        <span><a href="#">It helps SEO</a></span>
-        <span>/</span>
-        
-    </p>
-    
-    <p>
-        <span id="busuanzi_container_site_pv">
-            <span id="busuanzi_value_site_pv"></span>PV
-        </span>
-        <span id="busuanzi_container_site_uv">
-            <span id="busuanzi_value_site_uv"></span>UV
-        </span>
-        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
 </footer>
 
 
