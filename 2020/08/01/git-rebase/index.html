@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Rebase 场景一：合并多次提交纪录创建文件并分别提交1234567891011$ touch demo.txt$ git add demo.txt$ git commit -m &quot;add demo.txt&quot;$ touch function.txt$ git add function.txt$ git commit -m &quot;add function.txt&amp;quot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Git Rebase 合并Commit和解决分支冲突">
+<meta property="og:url" content="https://myphp.org/2020/08/01/git-rebase/index.html">
+<meta property="og:site_name" content="Janko&#39;s Blog">
+<meta property="og:description" content="Rebase 场景一：合并多次提交纪录创建文件并分别提交1234567891011$ touch demo.txt$ git add demo.txt$ git commit -m &quot;add demo.txt&quot;$ touch function.txt$ git add function.txt$ git commit -m &quot;add function.txt&amp;quot">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-08-01T03:33:48.000Z">
+<meta property="article:modified_time" content="2020-08-01T06:30:33.926Z">
+<meta property="article:author" content="帅进超（Janko）">
+<meta property="article:tag" content="Git">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>使用 Git Rebase 合并Commit和解决分支冲突</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.0.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://myphp.org/2020/08/01/git-rebase/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://myphp.org/2020/08/01/git-rebase/&text=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://myphp.org/2020/08/01/git-rebase/&is_video=false&description=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用 Git Rebase 合并Commit和解决分支冲突&body=Check out this article: https://myphp.org/2020/08/01/git-rebase/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://myphp.org/2020/08/01/git-rebase/&name=使用 Git Rebase 合并Commit和解决分支冲突&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://myphp.org/2020/08/01/git-rebase/&t=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Rebase-%E5%9C%BA%E6%99%AF%E4%B8%80%EF%BC%9A%E5%90%88%E5%B9%B6%E5%A4%9A%E6%AC%A1%E6%8F%90%E4%BA%A4%E7%BA%AA%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">Rebase 场景一：合并多次提交纪录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E5%B9%B6%E5%88%86%E5%88%AB%E6%8F%90%E4%BA%A4"><span class="toc-number">1.0.1.</span> <span class="toc-text">创建文件并分别提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8BGit%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.2.</span> <span class="toc-text">查看Git提交记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E6%9C%80%E8%BF%91%E4%B8%89%E6%AC%A1%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.3.</span> <span class="toc-text">合并最近三次提交记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E4%BF%9D%E5%AD%98%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.4.</span> <span class="toc-text">执行保存操作记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%8D%E6%AC%A1%E6%9F%A5%E7%9C%8BGit%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.5.</span> <span class="toc-text">再次查看Git提交记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E4%BA%A4%E5%88%B0%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93"><span class="toc-number">1.0.6.</span> <span class="toc-text">提交到远程仓库</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Rebase-%E5%9C%BA%E6%99%AF%E4%BA%8C%EF%BC%9A%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF"><span class="toc-number">2.</span> <span class="toc-text">Rebase 场景二：合并分支</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E8%BF%9C%E7%A8%8B%E4%B8%BB%E5%B9%B2%E5%88%87%E7%89%88%E6%9C%AC%E5%88%86%E6%94%AF"><span class="toc-number">2.0.1.</span> <span class="toc-text">从远程主干切版本分支</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E5%88%86%E6%94%AF%E6%8F%90%E4%BA%A4%E5%88%B0%E8%BF%9C%E7%A8%8B"><span class="toc-number">2.0.2.</span> <span class="toc-text">版本分支提交到远程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E5%9B%9E%E6%9C%AC%E5%9C%B0%E4%B8%BB%E5%B9%B2"><span class="toc-number">2.0.3.</span> <span class="toc-text">切回本地主干</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E5%B9%B2%E5%A2%9E%E5%8A%A0%E6%96%87%E4%BB%B6%E5%B9%B6%E6%8F%90%E4%BA%A4"><span class="toc-number">2.0.4.</span> <span class="toc-text">主干增加文件并提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E5%A2%9E%E5%8A%A0%E6%96%87%E4%BB%B6%E5%B9%B6%E6%8F%90%E4%BA%A4"><span class="toc-number">2.0.5.</span> <span class="toc-text">版本增加文件并提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E5%90%88%E5%B9%B6"><span class="toc-number">2.0.6.</span> <span class="toc-text">执行合并</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E9%80%81%E5%88%B0%E8%BF%9C%E7%A8%8B%E7%89%88%E6%9C%AC%E5%88%86%E6%94%AF"><span class="toc-number">2.0.7.</span> <span class="toc-text">推送到远程版本分支</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考：</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        使用 Git Rebase 合并Commit和解决分支冲突
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Janko's Blog</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-01T03:33:48.000Z" itemprop="datePublished">2020-08-01</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Git/" rel="tag">Git</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="Rebase-场景一：合并多次提交纪录"><a href="#Rebase-场景一：合并多次提交纪录" class="headerlink" title="Rebase 场景一：合并多次提交纪录"></a>Rebase 场景一：合并多次提交纪录</h1><h3 id="创建文件并分别提交"><a href="#创建文件并分别提交" class="headerlink" title="创建文件并分别提交"></a>创建文件并分别提交</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> touch demo.txt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> git add demo.txt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> git commit -m <span class="string">&quot;add demo.txt&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> touch function.txt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> git add function.txt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> git commit -m <span class="string">&quot;add function.txt&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> touch class.txt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> git add class.txt</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> git commit -m <span class="string">&quot;add class.txt&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="查看Git提交记录"><a href="#查看Git提交记录" class="headerlink" title="查看Git提交记录"></a>查看Git提交记录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> git <span class="built_in">log</span></span></span><br><span class="line">commit 1c643cac08aa8cc1daf7d4c71dc46fd46a70b722 (HEAD -&gt; master)</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 12:43:49 2020 +0800</span><br><span class="line"></span><br><span class="line">    add class.txt</span><br><span class="line"></span><br><span class="line">commit 187ee149a35f3eca37dfebd42c0f46fe0a37eaaf</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 12:42:55 2020 +0800</span><br><span class="line"></span><br><span class="line">    add function.txt</span><br><span class="line"></span><br><span class="line">commit 2bf1c7673ada887dfb46e7bed1a982b5ff2c533a</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 12:41:36 2020 +0800</span><br><span class="line"></span><br><span class="line">    add demo.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="合并最近三次提交记录"><a href="#合并最近三次提交记录" class="headerlink" title="合并最近三次提交记录"></a>合并最近三次提交记录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> git rebase -i HEAD~3</span></span><br><span class="line">pick 2bf1c76 add demo.txt</span><br><span class="line">pick 187ee14 add function.txt</span><br><span class="line">pick 1c643ca add class.txt</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Rebase 648f34f..1c643ca onto 648f34f (3 commands)</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Commands:</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> p, pick = use commit</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> r, reword = use commit, but edit the commit message</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> e, edit = use commit, but stop <span class="keyword">for</span> amending</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> s, squash = use commit, but meld into previous commit</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> f, fixup = like <span class="string">&quot;squash&quot;</span>, but discard this commit<span class="string">&#x27;s log message</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> x, <span class="built_in">exec</span> = run <span class="built_in">command</span> (the rest of the line) using shell</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> d, drop = remove commit</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> These lines can be re-ordered; they are executed from top to bottom.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If you remove a line here THAT COMMIT WILL BE LOST.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> However, <span class="keyword">if</span> you remove everything, the rebase will be aborted.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note that empty commits are commented out</span></span><br></pre></td></tr></table></figure>
+
+<p>此时会弹出交互界面，我们可以看到交互界面最上方有我们最近的三次提交记录，我们看到每个 <code>commit</code> 前都有一个 <code>pick</code> 标识，如果使用第一次的 <code>2bf1c76 add demo.txt</code> 这次提交记录作为最终的提交记录，只需要把后两次 <code>commit</code> 记录前的 <code>pick</code> 改为 <code>squash</code> 即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pick 2bf1c76 add demo.txt</span><br><span class="line">squash 187ee14 add function.txt</span><br><span class="line">squash 1c643ca add class.txt</span><br></pre></td></tr></table></figure>
+
+<p>保存 <code>:wq</code> 操作。</p>
+<h3 id="执行保存操作记录"><a href="#执行保存操作记录" class="headerlink" title="执行保存操作记录"></a>执行保存操作记录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git rebase --<span class="built_in">continue</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="再次查看Git提交记录"><a href="#再次查看Git提交记录" class="headerlink" title="再次查看Git提交记录"></a>再次查看Git提交记录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">log</span></span><br><span class="line">commit ac4b58b641545a41478267624787e08824f3100a (HEAD -&gt; master)</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 12:41:36 2020 +0800</span><br><span class="line"></span><br><span class="line">    add demo.txt</span><br><span class="line"></span><br><span class="line">    add function.txt</span><br><span class="line"></span><br><span class="line">    add class.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="提交到远程仓库"><a href="#提交到远程仓库" class="headerlink" title="提交到远程仓库"></a>提交到远程仓库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git push origin master</span><br></pre></td></tr></table></figure>
+
+<p>此时我们在远程仓库查看提交记录，三个文件只有一次 commit <code>add demo.txt</code>。</p>
+<h1 id="Rebase-场景二：合并分支"><a href="#Rebase-场景二：合并分支" class="headerlink" title="Rebase 场景二：合并分支"></a>Rebase 场景二：合并分支</h1><h3 id="从远程主干切版本分支"><a href="#从远程主干切版本分支" class="headerlink" title="从远程主干切版本分支"></a>从远程主干切版本分支</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout -b v0.1 origin/master</span><br></pre></td></tr></table></figure>
+
+<h3 id="版本分支提交到远程"><a href="#版本分支提交到远程" class="headerlink" title="版本分支提交到远程"></a>版本分支提交到远程</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git push origin v0.1</span><br></pre></td></tr></table></figure>
+
+<h3 id="切回本地主干"><a href="#切回本地主干" class="headerlink" title="切回本地主干"></a>切回本地主干</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master</span><br></pre></td></tr></table></figure>
+
+<h3 id="主干增加文件并提交"><a href="#主干增加文件并提交" class="headerlink" title="主干增加文件并提交"></a>主干增加文件并提交</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ touch v0.1.txt</span><br><span class="line">$ git add v0.1.txt</span><br><span class="line">$ git commit -m <span class="string">&quot;add v0.1.txt&quot;</span></span><br><span class="line">$ git push origin master</span><br></pre></td></tr></table></figure>
+
+<p>查看提交记录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">log</span></span><br><span class="line">commit 050cf5c8fa4ae3d99aa87381307696a19d785c9e (HEAD -&gt; master, origin/master, origin/HEAD)</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 14:17:42 2020 +0800</span><br><span class="line"></span><br><span class="line">    add v0.1.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="版本增加文件并提交"><a href="#版本增加文件并提交" class="headerlink" title="版本增加文件并提交"></a>版本增加文件并提交</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout v0.1</span><br><span class="line">$ touch merge.txt</span><br><span class="line">$ git add merge.txt</span><br><span class="line">$ git commit -m <span class="string">&quot;add merge.txt&quot;</span></span><br><span class="line">$ git push origin v0.1</span><br></pre></td></tr></table></figure>
+
+<p>查看提交记录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">log</span></span><br><span class="line">commit 2d174dcd1cb501fc2e09e0ab49b5d654489334bc (HEAD -&gt; v0.1, origin/v0.1)</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 14:24:32 2020 +0800</span><br><span class="line"></span><br><span class="line">    add merge.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行合并"><a href="#执行合并" class="headerlink" title="执行合并"></a>执行合并</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout v0.1</span><br><span class="line">$ git rebase origin&#x2F;master</span><br></pre></td></tr></table></figure>
+
+<p>查看提交记录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">log</span></span><br><span class="line">commit 98d2d7623625eca2ea9fba949b78225ce2e9ddfe (HEAD -&gt; v0.7)</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 14:24:32 2020 +0800</span><br><span class="line"></span><br><span class="line">    add merge.txt</span><br><span class="line"></span><br><span class="line">commit 050cf5c8fa4ae3d99aa87381307696a19d785c9e (origin/master, origin/HEAD, master)</span><br><span class="line">Author: Janko &lt;shuaijinchao@gmail.com&gt;</span><br><span class="line">Date:   Sat Aug 1 14:17:42 2020 +0800</span><br><span class="line"></span><br><span class="line">    add v0.7.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="推送到远程版本分支"><a href="#推送到远程版本分支" class="headerlink" title="推送到远程版本分支"></a>推送到远程版本分支</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git push origin v0.1 -f</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h1><p><a target="_blank" rel="noopener" href="http://jartto.wang/2018/12/11/git-rebase/">彻底搞懂 Git-Rebase</a><br><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2015/08/git-use-process.html">Git使用规范流程</a></p>
+<blockquote>
+<p>本文主要参考以上文章，一些成果归功于以上两篇文章作者。</p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Rebase-%E5%9C%BA%E6%99%AF%E4%B8%80%EF%BC%9A%E5%90%88%E5%B9%B6%E5%A4%9A%E6%AC%A1%E6%8F%90%E4%BA%A4%E7%BA%AA%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">Rebase 场景一：合并多次提交纪录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E5%B9%B6%E5%88%86%E5%88%AB%E6%8F%90%E4%BA%A4"><span class="toc-number">1.0.1.</span> <span class="toc-text">创建文件并分别提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8BGit%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.2.</span> <span class="toc-text">查看Git提交记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E5%B9%B6%E6%9C%80%E8%BF%91%E4%B8%89%E6%AC%A1%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.3.</span> <span class="toc-text">合并最近三次提交记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E4%BF%9D%E5%AD%98%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.4.</span> <span class="toc-text">执行保存操作记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%8D%E6%AC%A1%E6%9F%A5%E7%9C%8BGit%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95"><span class="toc-number">1.0.5.</span> <span class="toc-text">再次查看Git提交记录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E4%BA%A4%E5%88%B0%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93"><span class="toc-number">1.0.6.</span> <span class="toc-text">提交到远程仓库</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Rebase-%E5%9C%BA%E6%99%AF%E4%BA%8C%EF%BC%9A%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF"><span class="toc-number">2.</span> <span class="toc-text">Rebase 场景二：合并分支</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E8%BF%9C%E7%A8%8B%E4%B8%BB%E5%B9%B2%E5%88%87%E7%89%88%E6%9C%AC%E5%88%86%E6%94%AF"><span class="toc-number">2.0.1.</span> <span class="toc-text">从远程主干切版本分支</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E5%88%86%E6%94%AF%E6%8F%90%E4%BA%A4%E5%88%B0%E8%BF%9C%E7%A8%8B"><span class="toc-number">2.0.2.</span> <span class="toc-text">版本分支提交到远程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E5%9B%9E%E6%9C%AC%E5%9C%B0%E4%B8%BB%E5%B9%B2"><span class="toc-number">2.0.3.</span> <span class="toc-text">切回本地主干</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E5%B9%B2%E5%A2%9E%E5%8A%A0%E6%96%87%E4%BB%B6%E5%B9%B6%E6%8F%90%E4%BA%A4"><span class="toc-number">2.0.4.</span> <span class="toc-text">主干增加文件并提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E5%A2%9E%E5%8A%A0%E6%96%87%E4%BB%B6%E5%B9%B6%E6%8F%90%E4%BA%A4"><span class="toc-number">2.0.5.</span> <span class="toc-text">版本增加文件并提交</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E5%90%88%E5%B9%B6"><span class="toc-number">2.0.6.</span> <span class="toc-text">执行合并</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E9%80%81%E5%88%B0%E8%BF%9C%E7%A8%8B%E7%89%88%E6%9C%AC%E5%88%86%E6%94%AF"><span class="toc-number">2.0.7.</span> <span class="toc-text">推送到远程版本分支</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考：</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://myphp.org/2020/08/01/git-rebase/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://myphp.org/2020/08/01/git-rebase/&text=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://myphp.org/2020/08/01/git-rebase/&is_video=false&description=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用 Git Rebase 合并Commit和解决分支冲突&body=Check out this article: https://myphp.org/2020/08/01/git-rebase/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://myphp.org/2020/08/01/git-rebase/&title=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://myphp.org/2020/08/01/git-rebase/&name=使用 Git Rebase 合并Commit和解决分支冲突&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://myphp.org/2020/08/01/git-rebase/&t=使用 Git Rebase 合并Commit和解决分支冲突"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2020
+    帅进超（Janko）
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
