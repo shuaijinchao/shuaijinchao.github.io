@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="ModSecurity 原本是Apache上的一款开源 WAF，可以有效的增强web安全性，目前已经支持 Nginx 配合 Nginx 的灵活和高效，可以打造成生产级的 WAF，是保护和审核 Web 安全的利器。  准备工作 环境：CentOSNginx：http:&#x2F;&#x2F;nginx.org&#x2F;download&#x2F;nginx-1.19.1.tar.gzModsecurity for Nginx：http">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用ModSecurity实现Nginx的WAF功能">
+<meta property="og:url" content="https://myphp.org/2020/08/11/nginx-upgrade/index.html">
+<meta property="og:site_name" content="Janko&#39;s Blog">
+<meta property="og:description" content="ModSecurity 原本是Apache上的一款开源 WAF，可以有效的增强web安全性，目前已经支持 Nginx 配合 Nginx 的灵活和高效，可以打造成生产级的 WAF，是保护和审核 Web 安全的利器。  准备工作 环境：CentOSNginx：http:&#x2F;&#x2F;nginx.org&#x2F;download&#x2F;nginx-1.19.1.tar.gzModsecurity for Nginx：http">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-08-10T17:16:39.000Z">
+<meta property="article:modified_time" content="2020-08-10T15:41:05.719Z">
+<meta property="article:author" content="帅进超（Janko）">
+<meta property="article:tag" content="Nginx">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>使用ModSecurity实现Nginx的WAF功能</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.0.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/08/10/cpp-sigaction/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://myphp.org/2020/08/11/nginx-upgrade/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://myphp.org/2020/08/11/nginx-upgrade/&text=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://myphp.org/2020/08/11/nginx-upgrade/&is_video=false&description=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用ModSecurity实现Nginx的WAF功能&body=Check out this article: https://myphp.org/2020/08/11/nginx-upgrade/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://myphp.org/2020/08/11/nginx-upgrade/&name=使用ModSecurity实现Nginx的WAF功能&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://myphp.org/2020/08/11/nginx-upgrade/&t=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">2.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%AF%E7%94%A8standalone%E6%A8%A1%E5%9D%97%E5%B9%B6%E7%BC%96%E8%AF%91"><span class="toc-number">3.</span> <span class="toc-text">启用standalone模块并编译</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%B9%B6%E7%BC%96%E8%AF%91Nginx"><span class="toc-number">4.</span> <span class="toc-text">下载并编译Nginx</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E8%A7%84%E5%88%99"><span class="toc-number">5.</span> <span class="toc-text">添加规则</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BDOWASP%E8%A7%84%E5%88%99%EF%BC%9A"><span class="toc-number">5.1.</span> <span class="toc-text">下载OWASP规则：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E7%94%A8OWASP%E8%A7%84%E5%88%99"><span class="toc-number">5.2.</span> <span class="toc-text">启用OWASP规则</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AENginx"><span class="toc-number">6.</span> <span class="toc-text">配置Nginx</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">7.</span> <span class="toc-text">参考</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        使用ModSecurity实现Nginx的WAF功能
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Janko's Blog</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-10T17:16:39.000Z" itemprop="datePublished">2020-08-11</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Nginx/" rel="tag">Nginx</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <blockquote>
+<p><code>ModSecurity</code> 原本是Apache上的一款开源 <code>WAF</code>，可以有效的增强web安全性，目前已经支持 <code>Nginx</code> 配合 <code>Nginx</code> 的灵活和高效，可以打造成生产级的 <code>WAF</code>，是保护和审核 <code>Web</code> 安全的利器。</p>
+</blockquote>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><blockquote>
+<p>环境：CentOS<br>Nginx：<a target="_blank" rel="noopener" href="http://nginx.org/download/nginx-1.19.1.tar.gz">http://nginx.org/download/nginx-1.19.1.tar.gz</a><br>Modsecurity for Nginx：<a target="_blank" rel="noopener" href="https://www.modsecurity.org/tarball/2.9.3/modsecurity-2.9.3.tar.gz">https://www.modsecurity.org/tarball/2.9.3/modsecurity-2.9.3.tar.gz</a><br>OWASP规则集： <a target="_blank" rel="noopener" href="https://github.com/SpiderLabs/owasp-modsecurity-crs">https://github.com/SpiderLabs/owasp-modsecurity-crs</a></p>
+</blockquote>
+<h1 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Nginx 依赖</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> yum -y install zlib zlib-devel openssl openssl-devel  pcre pcre-devel</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ModSecurity 依赖</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> yum -y install httpd-devel apr apr-util-devel apr-devel  pcre pcre-devel  libxml2 libxml2-devel</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="启用standalone模块并编译"><a href="#启用standalone模块并编译" class="headerlink" title="启用standalone模块并编译"></a>启用standalone模块并编译</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</span><br><span class="line">$ wget https://www.modsecurity.org/tarball/2.9.3/modsecurity-2.9.3.tar.gz</span><br><span class="line">$ tar zxvf modsecurity-2.9.3.tar.gz</span><br><span class="line">$ <span class="built_in">cd</span> modsecurity-2.9.3</span><br><span class="line">$ sudo ./autogen.sh</span><br><span class="line">$ sudo ./configure --<span class="built_in">enable</span>-standalone-module --<span class="built_in">disable</span>-mlogc</span><br><span class="line">$ sudo make</span><br></pre></td></tr></table></figure>
+
+<h1 id="下载并编译Nginx"><a href="#下载并编译Nginx" class="headerlink" title="下载并编译Nginx"></a>下载并编译Nginx</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</span><br><span class="line">$ wget http://nginx.org/download/nginx-1.19.1.tar.gz</span><br><span class="line">$ tar zxvf nginx-1.19.1.tar.gz</span><br><span class="line">$ <span class="built_in">cd</span> nginx-1.19.1</span><br><span class="line">$ ./configure --add-module=/usr/<span class="built_in">local</span>/src/modsecurity-2.9.3/nginx/modsecurity --with-http_ssl_module</span><br><span class="line">$ sudo make</span><br><span class="line">$ sudo make install</span><br></pre></td></tr></table></figure>
+
+<h1 id="添加规则"><a href="#添加规则" class="headerlink" title="添加规则"></a>添加规则</h1><p><code>ModSecurity</code> 倾向于过滤和阻止 <code>Web</code> 危险，之所以强大就在于规则，OWASP提供的规则是于社区志愿者维护的，被称为核心规则CRS（corerules）,规则可靠强大，当然也可以自定义规则来满足各种需求。</p>
+<h2 id="下载OWASP规则："><a href="#下载OWASP规则：" class="headerlink" title="下载OWASP规则："></a>下载OWASP规则：</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/nginx/conf</span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/SpiderLabs/owasp-modsecurity-crs</span><br><span class="line">$ <span class="built_in">cd</span> owasp-modsecurity-crs</span><br><span class="line">$ mv modsecurity_crs_10_setup.conf.example modsecurity_crs_10_setup.conf</span><br></pre></td></tr></table></figure>
+
+<h2 id="启用OWASP规则"><a href="#启用OWASP规则" class="headerlink" title="启用OWASP规则"></a>启用OWASP规则</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ cp /usr/<span class="built_in">local</span>/src/modsecurity-2.9.3/modsecurity.conf-recommended /usr/<span class="built_in">local</span>/nginx/conf/modsecurity.conf</span><br><span class="line">$ cp /usr/<span class="built_in">local</span>/src/modsecurity-2.9.3/unicode.mapping /usr/<span class="built_in">local</span>/nginx/conf/unicode.mapping</span><br><span class="line"><span class="comment"># 将 SecRuleEngine 设置为 on</span></span><br><span class="line">$ vim /usr/<span class="built_in">local</span>/nginx/conf/modsecurity.conf</span><br><span class="line"></span><br><span class="line">SecRuleEngine on</span><br></pre></td></tr></table></figure>
+
+<p><code>owasp-modsecurity-crs</code> 下有很多存放规则的文件夹，例如 <code>base_rules</code>、<code>experimental_rules</code>、<code>optional_rules</code>、<code>slr_rules</code>，里面的规则按需要启用，需要启用的规则使用Include进来即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置规则</span></span><br><span class="line">$ vim /usr/<span class="built_in">local</span>/nginx/conf/modsecurity.conf</span><br><span class="line"></span><br><span class="line">Include owasp-modsecurity-crs/modsecurity_crs_10_setup.conf</span><br><span class="line">Include owasp-modsecurity-crs/base_rules/modsecurity_crs_41_sql_injection_attacks.conf</span><br><span class="line">Include owasp-modsecurity-crs/base_rules/modsecurity_crs_41_xss_attacks.conf</span><br><span class="line">Include owasp-modsecurity-crs/base_rules/modsecurity_crs_40_generic_attacks.conf</span><br><span class="line">Include owasp-modsecurity-crs/experimental_rules/modsecurity_crs_11_dos_protection.conf</span><br><span class="line">Include owasp-modsecurity-crs/experimental_rules/modsecurity_crs_11_brute_force.conf</span><br><span class="line">Include owasp-modsecurity-crs/optional_rules/modsecurity_crs_16_session_hijacking.conf</span><br></pre></td></tr></table></figure>
+
+<h1 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h1><p>只需在 <code>Nginx</code> 配置文件 <code>location</code> 中加入 <code>ModSecurityEnabled</code> 和 <code>ModSecurityConfig</code> 即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ vim /usr/<span class="built_in">local</span>/nginx/conf/nginx.conf</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        ModSecurityEnabled on;</span><br><span class="line">        ModSecurityConfig modsecurity.conf;</span><br><span class="line">        proxy_pass http://upstream;</span><br><span class="line">        proxy_redirect        off;</span><br><span class="line">        proxy_set_header Host <span class="variable">$host</span>;</span><br><span class="line">        proxy_set_header X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">        proxy_set_header  X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/5f04092a8154">Nginx 用ModSecurity实现WAF功能</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/liujinhua306/p/9808651.html">nginx配合modsecurity实现WAF功能</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.osyunwei.com/archives/9817.html">Linux下Nginx服务器配置Modsecurity实现Web应用防护系统</a></li>
+</ul>
+<blockquote>
+<p>本文主要参考以上文章，一些成果归功于原文作者。</p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-number">2.</span> <span class="toc-text">安装依赖</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%AF%E7%94%A8standalone%E6%A8%A1%E5%9D%97%E5%B9%B6%E7%BC%96%E8%AF%91"><span class="toc-number">3.</span> <span class="toc-text">启用standalone模块并编译</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%B9%B6%E7%BC%96%E8%AF%91Nginx"><span class="toc-number">4.</span> <span class="toc-text">下载并编译Nginx</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E8%A7%84%E5%88%99"><span class="toc-number">5.</span> <span class="toc-text">添加规则</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BDOWASP%E8%A7%84%E5%88%99%EF%BC%9A"><span class="toc-number">5.1.</span> <span class="toc-text">下载OWASP规则：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E7%94%A8OWASP%E8%A7%84%E5%88%99"><span class="toc-number">5.2.</span> <span class="toc-text">启用OWASP规则</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%85%8D%E7%BD%AENginx"><span class="toc-number">6.</span> <span class="toc-text">配置Nginx</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">7.</span> <span class="toc-text">参考</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://myphp.org/2020/08/11/nginx-upgrade/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://myphp.org/2020/08/11/nginx-upgrade/&text=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://myphp.org/2020/08/11/nginx-upgrade/&is_video=false&description=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=使用ModSecurity实现Nginx的WAF功能&body=Check out this article: https://myphp.org/2020/08/11/nginx-upgrade/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://myphp.org/2020/08/11/nginx-upgrade/&title=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://myphp.org/2020/08/11/nginx-upgrade/&name=使用ModSecurity实现Nginx的WAF功能&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://myphp.org/2020/08/11/nginx-upgrade/&t=使用ModSecurity实现Nginx的WAF功能"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2020
+    帅进超（Janko）
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
